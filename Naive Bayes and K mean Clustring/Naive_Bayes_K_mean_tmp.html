@@ -1,0 +1,469 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Naive_Bayes_K_mean.md</title>
+<meta http-equiv="Content-type" content="text/html;charset=UTF-8">
+
+<style>
+/* https://github.com/microsoft/vscode/blob/master/extensions/markdown-language-features/media/markdown.css */
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
+
+body {
+	font-family: var(--vscode-markdown-font-family, -apple-system, BlinkMacSystemFont, "Segoe WPC", "Segoe UI", "Ubuntu", "Droid Sans", sans-serif);
+	font-size: var(--vscode-markdown-font-size, 14px);
+	padding: 0 26px;
+	line-height: var(--vscode-markdown-line-height, 22px);
+	word-wrap: break-word;
+}
+
+#code-csp-warning {
+	position: fixed;
+	top: 0;
+	right: 0;
+	color: white;
+	margin: 16px;
+	text-align: center;
+	font-size: 12px;
+	font-family: sans-serif;
+	background-color:#444444;
+	cursor: pointer;
+	padding: 6px;
+	box-shadow: 1px 1px 1px rgba(0,0,0,.25);
+}
+
+#code-csp-warning:hover {
+	text-decoration: none;
+	background-color:#007acc;
+	box-shadow: 2px 2px 2px rgba(0,0,0,.25);
+}
+
+body.scrollBeyondLastLine {
+	margin-bottom: calc(100vh - 22px);
+}
+
+body.showEditorSelection .code-line {
+	position: relative;
+}
+
+body.showEditorSelection .code-active-line:before,
+body.showEditorSelection .code-line:hover:before {
+	content: "";
+	display: block;
+	position: absolute;
+	top: 0;
+	left: -12px;
+	height: 100%;
+}
+
+body.showEditorSelection li.code-active-line:before,
+body.showEditorSelection li.code-line:hover:before {
+	left: -30px;
+}
+
+.vscode-light.showEditorSelection .code-active-line:before {
+	border-left: 3px solid rgba(0, 0, 0, 0.15);
+}
+
+.vscode-light.showEditorSelection .code-line:hover:before {
+	border-left: 3px solid rgba(0, 0, 0, 0.40);
+}
+
+.vscode-light.showEditorSelection .code-line .code-line:hover:before {
+	border-left: none;
+}
+
+.vscode-dark.showEditorSelection .code-active-line:before {
+	border-left: 3px solid rgba(255, 255, 255, 0.4);
+}
+
+.vscode-dark.showEditorSelection .code-line:hover:before {
+	border-left: 3px solid rgba(255, 255, 255, 0.60);
+}
+
+.vscode-dark.showEditorSelection .code-line .code-line:hover:before {
+	border-left: none;
+}
+
+.vscode-high-contrast.showEditorSelection .code-active-line:before {
+	border-left: 3px solid rgba(255, 160, 0, 0.7);
+}
+
+.vscode-high-contrast.showEditorSelection .code-line:hover:before {
+	border-left: 3px solid rgba(255, 160, 0, 1);
+}
+
+.vscode-high-contrast.showEditorSelection .code-line .code-line:hover:before {
+	border-left: none;
+}
+
+img {
+	max-width: 100%;
+	max-height: 100%;
+}
+
+a {
+	text-decoration: none;
+}
+
+a:hover {
+	text-decoration: underline;
+}
+
+a:focus,
+input:focus,
+select:focus,
+textarea:focus {
+	outline: 1px solid -webkit-focus-ring-color;
+	outline-offset: -1px;
+}
+
+hr {
+	border: 0;
+	height: 2px;
+	border-bottom: 2px solid;
+}
+
+h1 {
+	padding-bottom: 0.3em;
+	line-height: 1.2;
+	border-bottom-width: 1px;
+	border-bottom-style: solid;
+}
+
+h1, h2, h3 {
+	font-weight: normal;
+}
+
+table {
+	border-collapse: collapse;
+}
+
+table > thead > tr > th {
+	text-align: left;
+	border-bottom: 1px solid;
+}
+
+table > thead > tr > th,
+table > thead > tr > td,
+table > tbody > tr > th,
+table > tbody > tr > td {
+	padding: 5px 10px;
+}
+
+table > tbody > tr + tr > td {
+	border-top: 1px solid;
+}
+
+blockquote {
+	margin: 0 7px 0 5px;
+	padding: 0 16px 0 10px;
+	border-left-width: 5px;
+	border-left-style: solid;
+}
+
+code {
+	font-family: Menlo, Monaco, Consolas, "Droid Sans Mono", "Courier New", monospace, "Droid Sans Fallback";
+	font-size: 1em;
+	line-height: 1.357em;
+}
+
+body.wordWrap pre {
+	white-space: pre-wrap;
+}
+
+pre:not(.hljs),
+pre.hljs code > div {
+	padding: 16px;
+	border-radius: 3px;
+	overflow: auto;
+}
+
+pre code {
+	color: var(--vscode-editor-foreground);
+	tab-size: 4;
+}
+
+/** Theming */
+
+.vscode-light pre {
+	background-color: rgba(220, 220, 220, 0.4);
+}
+
+.vscode-dark pre {
+	background-color: rgba(10, 10, 10, 0.4);
+}
+
+.vscode-high-contrast pre {
+	background-color: rgb(0, 0, 0);
+}
+
+.vscode-high-contrast h1 {
+	border-color: rgb(0, 0, 0);
+}
+
+.vscode-light table > thead > tr > th {
+	border-color: rgba(0, 0, 0, 0.69);
+}
+
+.vscode-dark table > thead > tr > th {
+	border-color: rgba(255, 255, 255, 0.69);
+}
+
+.vscode-light h1,
+.vscode-light hr,
+.vscode-light table > tbody > tr + tr > td {
+	border-color: rgba(0, 0, 0, 0.18);
+}
+
+.vscode-dark h1,
+.vscode-dark hr,
+.vscode-dark table > tbody > tr + tr > td {
+	border-color: rgba(255, 255, 255, 0.18);
+}
+
+</style>
+
+<style>
+/* Tomorrow Theme */
+/* http://jmblog.github.com/color-themes-for-google-code-highlightjs */
+/* Original theme - https://github.com/chriskempson/tomorrow-theme */
+
+/* Tomorrow Comment */
+.hljs-comment,
+.hljs-quote {
+	color: #8e908c;
+}
+
+/* Tomorrow Red */
+.hljs-variable,
+.hljs-template-variable,
+.hljs-tag,
+.hljs-name,
+.hljs-selector-id,
+.hljs-selector-class,
+.hljs-regexp,
+.hljs-deletion {
+	color: #c82829;
+}
+
+/* Tomorrow Orange */
+.hljs-number,
+.hljs-built_in,
+.hljs-builtin-name,
+.hljs-literal,
+.hljs-type,
+.hljs-params,
+.hljs-meta,
+.hljs-link {
+	color: #f5871f;
+}
+
+/* Tomorrow Yellow */
+.hljs-attribute {
+	color: #eab700;
+}
+
+/* Tomorrow Green */
+.hljs-string,
+.hljs-symbol,
+.hljs-bullet,
+.hljs-addition {
+	color: #718c00;
+}
+
+/* Tomorrow Blue */
+.hljs-title,
+.hljs-section {
+	color: #4271ae;
+}
+
+/* Tomorrow Purple */
+.hljs-keyword,
+.hljs-selector-tag {
+	color: #8959a8;
+}
+
+.hljs {
+	display: block;
+	overflow-x: auto;
+	color: #4d4d4c;
+	padding: 0.5em;
+}
+
+.hljs-emphasis {
+	font-style: italic;
+}
+
+.hljs-strong {
+	font-weight: bold;
+}
+</style>
+
+<style>
+/*
+ * Markdown PDF CSS
+ */
+
+ body {
+	font-family: -apple-system, BlinkMacSystemFont, "Segoe WPC", "Segoe UI", "Ubuntu", "Droid Sans", sans-serif, "Meiryo";
+	padding: 0 12px;
+}
+
+pre {
+	background-color: #f8f8f8;
+	border: 1px solid #cccccc;
+	border-radius: 3px;
+	overflow-x: auto;
+	white-space: pre-wrap;
+	overflow-wrap: break-word;
+}
+
+pre:not(.hljs) {
+	padding: 23px;
+	line-height: 19px;
+}
+
+blockquote {
+	background: rgba(127, 127, 127, 0.1);
+	border-color: rgba(0, 122, 204, 0.5);
+}
+
+.emoji {
+	height: 1.4em;
+}
+
+code {
+	font-size: 14px;
+	line-height: 19px;
+}
+
+/* for inline code */
+:not(pre):not(.hljs) > code {
+	color: #C9AE75; /* Change the old color so it seems less like an error */
+	font-size: inherit;
+}
+
+/* Page Break : use <div class="page"/> to insert page break
+-------------------------------------------------------- */
+.page {
+	page-break-after: always;
+}
+
+</style>
+
+<script src="https://unpkg.com/mermaid/dist/mermaid.min.js"></script>
+</head>
+<body>
+  <script>
+    mermaid.initialize({
+      startOnLoad: true,
+      theme: document.body.classList.contains('vscode-dark') || document.body.classList.contains('vscode-high-contrast')
+          ? 'dark'
+          : 'default'
+    });
+  </script>
+<h1 id="naive-bayes-and-k-mean-clustring">Naive Bayes and K Mean Clustring</h1>
+<blockquote>
+<p>Naive Bayes</p>
+</blockquote>
+<p>Naïve Baye is Classification (Supervise) Learning Algorithm.</p>
+<p>Naïve Bayes uses Bayes' Theorem, combined with a (&quot;naive&quot;) presumption of conditional independence, to predict the value of a target (output), from evidence given by one or more predictor (input) fields.</p>
+<p>The Naive Bayes Classifier technique is based on Bayesian theorem and is particularly suited when the dimensionality of the inputs is high.</p>
+<p>Despite its simplicity, Naive Bayes can often outperform more sophisticated classification methods.</p>
+<p>Based on concept of Prior Probability and Likelihood and Posterior Probability</p>
+<pre class="hljs"><code><div>events knowledge guides subsequent similar events.
+In this algorithm, it is assumed that every trait of the data being classified is independent of all other traits given
+the class. This assumption of independent dataset traits grounds it’s naming with the word naive. Bayes’
+Theorem is denominated after prominent statistician Thomas Bayes.
+It may be represented as:
+P(h/e) = P(e/h) . P(h) = P(e/h). P(h)
+P(e) P(e/h). P(h) + P(e/~h). P(~h)
+Eqn 1: Baye’s Theorem [4]
+ Where P(h) is the prior probability of hypothesis h.
+ P(h/e) is the posterior probability of hypothesis h (in presence of the evidence e).
+ P(e/h) is the likelihood of evidence e on hypothesis h.
+A. Proceedings
+The elucidated equation for classification may be put in writing as:
+P( Class A| Trait 1, Trait 2) = P(Trait 1| Class A) . P(Trait 2| Class A) . P(Class A)
+P(Trait 1). P(Trait 2)
+
+
+</div></code></pre>
+<p><img src="file:///i:/python ka chilla/Assignment work/Naive Bayes and K mean Clustring/nb.png" alt="image"></p>
+<hr>
+<p><img src="file:///i:/python ka chilla/Assignment work/Naive Bayes and K mean Clustring/nbp.png" alt="image"></p>
+<blockquote>
+<p>K means</p>
+</blockquote>
+<pre class="hljs"><code><div>This algorithm divides M data points (which are in N dimensions) into K clusters in order to minimize the
+within-cluster sum of squares. We try to achieve the &quot;local&quot; optima solutions such that no inter-cluster data
+point manoeuvre reduces the within-cluster sum of squares. [1]
+Basically, this algorithm creates k clusters and pairs similar type of objects in a unique cluster. Thus k clusters
+are formed in such a way that the constituents of a certain cluster are similar as compared to the non-cluster
+constituents of a certain data set.
+A. Proceedings
+Initially, k initial cluster centres are selected and then iteratively refined as:
+1. Each instance di is assigned to its closest cluster centre.
+2. Each cluster centre Cj is then updated and this becomes equivalent to the mean of its elemental
+instances. [2]
+These steps are iterated until no further change is there in the apportionment of instances to clusters. Simply we
+may say that iterations are continued till cluster memberships are stabilized. This is called convergence.
+
+</div></code></pre>
+<p><img src="file:///i:/python ka chilla/Assignment work/Naive Bayes and K mean Clustring/km.png" alt="image"></p>
+<hr>
+<p><img src="file:///i:/python ka chilla/Assignment work/Naive Bayes and K mean Clustring/km1.png" alt="image"></p>
+<p>Algorithm Beginner Machine Learning Statistics Videos
+Objective</p>
+<pre><code>Naive Bayes is a fast, easy to understand, and highly scalable algorithm.
+Understand the working of Naive Bayes, its types, and use cases.
+</code></pre>
+<p>Introduction</p>
+<p>Naive Bayes is one the most popular and beginner-friendly algorithms that anyone can use. In this article, we are going to explore the Naive Bayes Algorithm.</p>
+<p>Note: If you are more interested in learning concepts in an Audio-Visual format, We have this entire article explained in the video below. If not, you may continue reading.</p>
+<p>Concept  Behind Naive Bayes</p>
+<p>Let’s First understand how Naive Bayes works through an example. We have a dataset with some features Outlook, Temp, Humidity, and Windy, and the target here is to predict whether a person or team will play tennis or not. So, we are representing features as X like X1, X2, and so on. Similarly, the classes are represented as C1 and C2.</p>
+<p>Naive Bayes Algorithm Data</p>
+<p>In Naive Bayes for every observation, we determine the probability that it belongs to class 1 or class 2. For example, here we first find out the probability that the person will play given that Outlook is Sunny, Temperature is Hot, Humidity is High and it is not windy as shown below. Later, we will also calculate the probability that the person will not play given the same conditions. This is repeated for all the rows.</p>
+<p>Naive Bayes Algorithm Data 2</p>
+<p>So this is in a way calculating the conditional probability, where we try to predict the class based on the conditions or the features here.</p>
+<p>Conditional Probability</p>
+<p>Recall the formula of conditional probability</p>
+<p>Conditional Probability naive bayes algorithm</p>
+<p>In this case, we have the probability of E1 for a given condition E2. Here, we are predicting the probability of class1 and class2 based on the given condition. If I try to write the same formula in terms of classes and features, we will get the following equation</p>
+<p>Now we have two classes and four features, so if we write this formula for class C1, it will be something like this.</p>
+<p>formula for class C1</p>
+<p>Here, we replaced Ck with C1 and X with the intersection of X1, X2, X3, X4. You might have a question, why we are taking the intersection? It’s because we are taking the situation when all these features are present at the same time.</p>
+<p>The Naive Bayes algorithm assumes that all the features are independent of each other or in other words all the features are unrelated. With that assumption, we can further simplify the above formula and write it in this form</p>
+<p>Naive Bayes algorithm assumes</p>
+<p>This is the final equation of the Naive Bayes and we have to calculate the probability of both C1 and C2.</p>
+<p>For this particular example-</p>
+<p>probability of both C1 and C2</p>
+<p>This means we have to find the probability of a person will play or not based on the given features. Whichever the probability is higher is taken as the final class.</p>
+<h1 id="types-of-naive-bayes">Types of Naive Bayes</h1>
+<p>Now let’s discuss different types of Naive Bayes algorithm and which is used when. So, we have three types</p>
+<h1 id="gaussian-naive-bayes">Gaussian Naive Bayes</h1>
+<p>This type of Naive Bayes is used when variables are continuous in nature. It assumes that all the variables have a normal distribution. So if you have some variables which do not have this property, you might want to transform them to the features having distribution normal.</p>
+<h1 id="multinomial-naive-bayes">Multinomial Naive Bayes</h1>
+<p>Next comes the multinomial Naive Bayes. This is used when the features represent the frequency.</p>
+<p>Suppose you have a text document and you extract all the unique words and create multiple features where each feature represents the count of the word in the document. In such a case, we have a frequency as a feature. In such a scenario, we use multinomial Naive Bayes.</p>
+<p>It ignores the non-occurrence of the features. So, if you have frequency 0 then the probability of occurrence of that feature will be 0 hence multinomial naive Bayes ignores that feature. It is known to work well with text classification problems.</p>
+<h1 id="bernoulli-naive-bayes">Bernoulli Naive Bayes</h1>
+<p>This is used when features are binary. So, instead of using the frequency of the word, if you have discrete features in 1s and 0s that represent the presence or absence of a feature. In that case, the features will be binary and we will use Bernoulli Naive Bayes.</p>
+<p>Also, this method will penalize the non-occurrence of a feature, unlike multinomial Naive Bayes.
+Advantages of Naive Bayes</p>
+<blockquote>
+<p>Here are some advantages of the Naive Bayes algorithm.</p>
+</blockquote>
+<pre class="hljs"><code><div> It is much faster than the other algorithms as it is just calculating the probabilities.
+ Naive Bayes is easily scalable hence widely used in the industry.
+ It is a popular choice for text classification problems.```
+
+ 
+</div></code></pre>
+
+</body>
+</html>
